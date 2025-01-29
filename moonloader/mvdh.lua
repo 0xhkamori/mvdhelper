@@ -346,15 +346,6 @@ end
 
 sampRegisterChatCommand('mtakelic', mtakelic)
 
-function pt()
-    lua_thread.create(function ()
-        sampSendChat(u8:decode('/police_tablet'))
-    end)
-end
-
-sampRegisterChatCommand('pt', pt)
-
-
 function apply_custom_style()
     imgui.SwitchContext()
     local style = imgui.GetStyle()
@@ -476,10 +467,6 @@ function imgui.OnDrawFrame()
         end
         if imgui.Button('Зачитать миранду') then
             marrest1()
-        end
-        imgui.SameLine()
-        if imgui.Button('Открыть полицейский планшет') then
-            pt()
         end
     end
     if menu[2] then
