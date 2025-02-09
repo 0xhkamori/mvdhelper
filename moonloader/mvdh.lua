@@ -346,6 +346,68 @@ end
 
 sampRegisterChatCommand('mtakelic', mtakelic)
 
+function speech_doc()
+    lua_thread.create(function()
+        sampSendChat(u8:decode('/do Жетон [Сотрудника МВД] на груди.'))
+        wait(700)
+        sampSendChat(u8:decode('/do В нагрудном кармане удостоверение сотрудника МВД.'))
+        wait(700)
+        sampSendChat(u8:decode('/me достал удостоверение в развернутом виде'))
+        wait(700)
+        sampSendChat(u8:decode('/me предъявил документ человеку напротив'))
+    end)
+end
+
+function speech_search()
+    lua_thread.create(function()
+        sampSendChat(u8:decode('/do На поясе висит сумка для обыска.'))
+        wait(900)
+        sampSendChat(u8:decode('/me достал перчатки из сумки'))
+        wait(900)
+        sampSendChat(u8:decode('/do Перчатки в руках.'))
+        wait(900)
+        sampSendChat(u8:decode('/me показал ориентировку человеку напротив'))
+        wait(1100)
+        sampSendChat(u8:decode('/todo Надев перчатки на руки*Расслабьтесь. Если ничего не найду, больно не будет.'))
+        wait(1100)
+        sampSendChat(u8:decode('/me провел руками по верхним частям тела в области груди и рук'))
+        wait(1100)
+        sampSendChat(u8:decode('/me провел руками по туловищу в области пояса и карманов'))
+        wait(1100)
+        sampSendChat(u8:decode('/me провел руками по нижним частям тела в области ног'))
+    end)
+end
+
+function speech_mask()
+    lua_thread.create(function()
+        sampSendChat(u8:decode('/do Человек напротив находится в маске.'))
+        wait(400)
+        sampSendChat(u8:decode('/me протянув правую руку вперёд, сорвал маску с лица у человека напротив'))
+        wait(400)
+        sampSendChat(u8:decode('/do Маска сорвана, человек находится без маски на лице.'))
+        wait(400)
+        sampSendChat(u8:decode('/n Команда для снятие маски: /reset или /maskoff'))
+    end)
+end
+
+function speech_finger()
+    lua_thread.create(function()
+        sampSendChat(u8:decode('/do Аппарат "CТОЛ" в кармане.'))
+        wait(700)
+        sampSendChat(u8:decode('/me резким движением достал Аппарат'))
+        wait(700)
+        sampSendChat(u8:decode('/do Аппарат "СТОЛ" в руке.'))
+        wait(700)
+        sampSendChat(u8:decode('/me резким движением потянул руку гражданина напротив и приложил его палец к аппарату'))
+        wait(700)
+        sampSendChat(u8:decode('/do Процесс сканирования начат.'))
+        wait(7006)
+        sampSendChat(u8:decode('/do Процесс завершен.'))
+        wait(700)
+        sampSendChat(u8:decode('/do Личность установлена.'))
+    end)
+end
+
 function apply_custom_style()
     imgui.SwitchContext()
     local style = imgui.GetStyle()
@@ -405,16 +467,17 @@ function apply_custom_style()
 end
 apply_custom_style()
 
-local menu = {true, -- первая вкладка будет активная, когда откроешь окно
+local menu = {true,
     false,
     false,
-    false,}
+    false,
+    false}
 
 local main_window_state = imgui.ImBool(false)
 function imgui.OnDrawFrame()
   if main_window_state.v then
     imgui.SetNextWindowSize(imgui.ImVec2(550, 300), imgui.Cond.FirstUseEver)
-    imgui.Begin('MVDHelper by Line_Hearter', main_window_state)
+    imgui.Begin('MVDHelper by Arid_Sadface [12]', main_window_state)
     imgui.BeginGroup()
     if imgui.Button('Биндер') then
         uu() menu[1] = true
@@ -426,6 +489,14 @@ function imgui.OnDrawFrame()
     imgui.SameLine()
     if imgui.Button('Настройки') then
         uu() menu[3] = true
+    end
+    imgui.SameLine()
+    if imgui.Button('Персонаж') then
+        uu() menu[4] = true
+    end
+    imgui.SameLine()
+    if imgui.Button('Речь') then
+        uu() menu[5] = true
     end
     imgui.SameLine()
     imgui.EndGroup()
@@ -501,23 +572,53 @@ function imgui.OnDrawFrame()
         imgui.Text('Результат:')
         imgui.Text(' [' .. plrLetter.v .. '] Докладывает ' .. fam.v .. ', ' .. wtd .. ' '  .. test_text_buffer3.v .. '. Состояние ' .. sost .. '.')
         if imgui.Button('Отправить') then
-            sampSendChat('/n [' .. plrLetter.v .. '] Докладывает ' .. fam.v .. ', ' .. wtd .. ' '  .. post.v .. '. Состояние ' .. sost .. '.')
+            sampSendChat(u8:decode('/n [' .. plrLetter.v .. '] Докладывает ' .. fam.v .. ', ' .. wtd .. ' '  .. test_text_buffer3.v .. '. Состояние ' .. sost .. '.'))
         end
     end
-    if menu [3] then
+    if menu[3] then
         imgui.PushItemWidth(150)
         imgui.InputText('Имя Фамилия', plrName)
         imgui.InputText('Звание', plrRank)
         imgui.InputText('Подразделение', plrUnit)
         imgui.InputText('Тег', plrLetter)
-        imgui.InputText('Фамилия', fam)
+        if plrName.v ~= '' and plrName.v:find(' ') then
+            fam.v = plrName.v:sub(plrName.v:find(' ') + 1)
+        else
+            fam.v = ''
+        end
+    end
+    if menu[4] then
+        imgui.Text('Статистика персонажа:')
+        imgui.Separator()
+        imgui.Text('Имя: '.. plrName.v)
+        imgui.Text('Фамилия: '.. fam.v)
+        imgui.Text('Звание: '.. plrRank.v)
+        imgui.Text('Подразделение: '.. plrUnit.v)
+        imgui.Text('Тег: '.. plrLetter.v)
+    end
+    if menu[5] then
+        if imgui.Button('Показать документы') then
+            speech_doc()
+        end
+        imgui.SameLine()
+        if imgui.Button('Обыск') then
+            speech_search()
+        end
+        imgui.SameLine()
+        if imgui.Button('Сорвать маску') then
+            speech_mask()
+        end
+        imgui.SameLine()
+        if imgui.Button('Сканер отпечатков') then
+            speech_finger()
+        end
     end
     imgui.End()
   end
 end
 
 function uu()
-    for i = 0,3 do
+    for i = 0,5 do
         menu[i] = false
     end
 end
@@ -525,9 +626,17 @@ end
 function main()
     while true do
       wait(0)
-      if wasKeyPressed(key.VK_X) then -- активация по нажатию клавиши X
-          main_window_state.v = not main_window_state.v -- переключаем статус активности окна, не забываем про .v
-      end
-      imgui.Process = main_window_state.v -- теперь значение imgui.Process всегда будет задаваться в зависимости от активности основного окна
+      if wasKeyPressed(key.VK_B) and not sampIsChatInputActive() and not sampIsDialogActive() then
+        main_window_state.v = not main_window_state.v
+        -- Block/unblock game input when menu is opened/closed
+        if main_window_state.v then
+            lockPlayerControl(true)
+            showCursor(true, true)
+        else
+            lockPlayerControl(false)
+            showCursor(false, false)
+        end
+    end
+      imgui.Process = main_window_state.v
     end
   end
