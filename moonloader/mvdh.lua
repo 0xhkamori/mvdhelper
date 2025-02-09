@@ -1,8 +1,19 @@
 local encoding = require 'encoding'
+local inicfg = require 'inicfg'
 local imgui = require 'imgui'
 local key = require 'vkeys'
 encoding.default = 'CP1251'
 u8 = encoding.UTF8
+
+local default_settings = {
+    main = {
+        plrName = '',
+        plrRank = '',
+        plrUnit = '',
+        plrLetter = '',
+        fam = ''
+    }
+}
 
 local plrName = imgui.ImBuffer(256)
 local plrRank = imgui.ImBuffer(256)
@@ -16,6 +27,27 @@ local test_text_buffer3 = imgui.ImBuffer(256)
 
 local combo_select = imgui.ImInt(0)
 local combo_select2 = imgui.ImInt(0)
+
+local settings = inicfg.load(default_settings, 'mvd_helper_settings')
+
+function save_settings()
+    settings.main.plrName = plrName.v
+    settings.main.plrRank = plrRank.v
+    settings.main.plrUnit = plrUnit.v
+    settings.main.plrLetter = plrLetter.v
+    settings.main.fam = fam.v
+    inicfg.save(settings, 'mvd_helper_settings')
+end
+
+function load_settings()
+    if settings then
+        plrName.v = settings.main.plrName or ''
+        plrRank.v = settings.main.plrRank or ''
+        plrUnit.v = settings.main.plrUnit or ''
+        plrLetter.v = settings.main.plrLetter or ''
+        fam.v = settings.main.fam or ''
+    end
+end
 
 function mdoc1(arg)
     lua_thread.create(function()
@@ -577,14 +609,24 @@ function imgui.OnDrawFrame()
     end
     if menu[3] then
         imgui.PushItemWidth(150)
-        imgui.InputText('Имя Фамилия', plrName)
-        imgui.InputText('Звание', plrRank)
-        imgui.InputText('Подразделение', plrUnit)
-        imgui.InputText('Тег', plrLetter)
+        if imgui.InputText('Имя Фамилия', plrName) then
+            save_settings()
+        end
+        if imgui.InputText('Звание', plrRank) then
+            save_settings()
+        end
+        if imgui.InputText('Подразделение', plrUnit) then
+            save_settings()
+        end
+        if imgui.InputText('Тег', plrLetter) then
+            save_settings()
+        end
         if plrName.v ~= '' and plrName.v:find(' ') then
             fam.v = plrName.v:sub(plrName.v:find(' ') + 1)
+            save_settings()
         else
             fam.v = ''
+            save_settings()
         end
     end
     if menu[4] then
@@ -594,7 +636,7 @@ function imgui.OnDrawFrame()
         imgui.Text('Фамилия: '.. fam.v)
         imgui.Text('Звание: '.. plrRank.v)
         imgui.Text('Подразделение: '.. plrUnit.v)
-        imgui.Text('Тег: '.. plrLetter.v)
+        imgui.Text('Тег: ['.. plrLetter.v .. ']')
     end
     if menu[5] then
         if imgui.Button('Показать документы') then
@@ -624,6 +666,10 @@ function uu()
 end
 
 function main()
+    if not doesFileExist('moonloader/config/mvd_helper_settings.ini') then
+        inicfg.save(default_settings, 'mvd_helper_settings')
+    end
+    load_settings()
     while true do
       wait(0)
       if wasKeyPressed(key.VK_B) and not sampIsChatInputActive() and not sampIsDialogActive() then
