@@ -2,19 +2,6 @@ local encoding = require 'encoding'
 local inicfg = require 'inicfg'
 local imgui = require 'imgui'
 local key = require 'vkeys'
-encoding.default = 'CP1251'
-u8 = encoding.UTF8
-
-local default_settings = {
-    main = {
-        plrName = '',
-        plrRank = '',
-        plrUnit = '',
-        plrLetter = '',
-        fam = ''
-    }
-}
-
 local plrName = imgui.ImBuffer(256)
 local plrRank = imgui.ImBuffer(256)
 local plrUnit = imgui.ImBuffer(256)
@@ -24,11 +11,13 @@ local post = imgui.ImBuffer(256)
 local wtd = 'Занял/Стою/Покинул'
 local sost = 'Стабильное / Критичное'
 local test_text_buffer3 = imgui.ImBuffer(256)
-
 local combo_select = imgui.ImInt(0)
 local combo_select2 = imgui.ImInt(0)
-
 local settings = inicfg.load(default_settings, 'mvd_helper_settings')
+local menu = {true, false, false, false, false}
+local main_window_state = imgui.ImBool(false)
+encoding.default = 'CP1251'
+u8 = encoding.UTF8
 
 function save_settings()
     settings.main.plrName = plrName.v
@@ -47,6 +36,82 @@ function load_settings()
         plrLetter.v = settings.main.plrLetter or ''
         fam.v = settings.main.fam or ''
     end
+end
+
+function findNearestPlayer()
+    local x, y, z = getCharCoordinates(PLAYER_PED)
+    local buffer, nearestPlayer, nearestPlayer_id
+    
+    for _, v in ipairs(getAllChars()) do
+        local result, id = sampGetPlayerIdByCharHandle(v)
+        if result and v ~= PLAYER_PED then
+            local distance = getDistanceBetweenCoords3d(x, y, z, getCharCoordinates(v))
+            if distance <= 2.0 and (buffer == nil or distance < buffer) and not isCharInAnyCar(v) then
+                buffer = distance
+                nearestPlayer_id = id
+            end
+        end
+    end
+    
+    return nearestPlayer_id
+end
+
+function apply_custom_style()
+    imgui.SwitchContext()
+    local style = imgui.GetStyle()
+    local colors = style.Colors
+    local clr = imgui.Col
+    local ImVec4 = imgui.ImVec4
+    style.WindowRounding = 2
+    style.WindowTitleAlign = imgui.ImVec2(0.5, 0.5)
+    style.ChildWindowRounding = 2.0
+    style.FrameRounding = 3
+    style.ItemSpacing = imgui.ImVec2(5.0, 4.0)
+    style.ScrollbarSize = 13.0
+    style.ScrollbarRounding = 0
+    style.GrabMinSize = 8.0
+    style.GrabRounding = 1.0
+    style.WindowPadding = imgui.ImVec2(4.0, 4.0)
+    style.FramePadding = imgui.ImVec2(3.5, 3.5)
+    style.ButtonTextAlign = imgui.ImVec2(0.0, 0.5)
+    colors[clr.WindowBg]              = ImVec4(0.14, 0.12, 0.16, 1.00);
+    colors[clr.ChildWindowBg]         = ImVec4(0.30, 0.20, 0.39, 0.00);
+    colors[clr.PopupBg]               = ImVec4(0.05, 0.05, 0.10, 0.90);
+    colors[clr.Border]                = ImVec4(0.89, 0.85, 0.92, 0.30);
+    colors[clr.BorderShadow]          = ImVec4(0.00, 0.00, 0.00, 0.00);
+    colors[clr.FrameBg]               = ImVec4(0.30, 0.20, 0.39, 1.00);
+    colors[clr.FrameBgHovered]        = ImVec4(0.41, 0.19, 0.63, 0.68);
+    colors[clr.FrameBgActive]         = ImVec4(0.41, 0.19, 0.63, 1.00);
+    colors[clr.TitleBg]               = ImVec4(0.41, 0.19, 0.63, 0.45);
+    colors[clr.TitleBgCollapsed]      = ImVec4(0.41, 0.19, 0.63, 0.35);
+    colors[clr.TitleBgActive]         = ImVec4(0.41, 0.19, 0.63, 0.78);
+    colors[clr.MenuBarBg]             = ImVec4(0.30, 0.20, 0.39, 0.57);
+    colors[clr.ScrollbarBg]           = ImVec4(0.30, 0.20, 0.39, 1.00);
+    colors[clr.ScrollbarGrab]         = ImVec4(0.41, 0.19, 0.63, 0.31);
+    colors[clr.ScrollbarGrabHovered]  = ImVec4(0.41, 0.19, 0.63, 0.78);
+    colors[clr.ScrollbarGrabActive]   = ImVec4(0.41, 0.19, 0.63, 1.00);
+    colors[clr.ComboBg]               = ImVec4(0.30, 0.20, 0.39, 1.00);
+    colors[clr.CheckMark]             = ImVec4(0.56, 0.61, 1.00, 1.00);
+    colors[clr.SliderGrab]            = ImVec4(0.41, 0.19, 0.63, 0.24);
+    colors[clr.SliderGrabActive]      = ImVec4(0.41, 0.19, 0.63, 1.00);
+    colors[clr.Button]                = ImVec4(0.41, 0.19, 0.63, 0.44);
+    colors[clr.ButtonHovered]         = ImVec4(0.41, 0.19, 0.63, 0.86);
+    colors[clr.ButtonActive]          = ImVec4(0.64, 0.33, 0.94, 1.00);
+    colors[clr.Header]                = ImVec4(0.41, 0.19, 0.63, 0.76);
+    colors[clr.HeaderHovered]         = ImVec4(0.41, 0.19, 0.63, 0.86);
+    colors[clr.HeaderActive]          = ImVec4(0.41, 0.19, 0.63, 1.00);
+    colors[clr.ResizeGrip]            = ImVec4(0.41, 0.19, 0.63, 0.20);
+    colors[clr.ResizeGripHovered]     = ImVec4(0.41, 0.19, 0.63, 0.78);
+    colors[clr.ResizeGripActive]      = ImVec4(0.41, 0.19, 0.63, 1.00);
+    colors[clr.CloseButton]           = ImVec4(1.00, 1.00, 1.00, 0.75);
+    colors[clr.CloseButtonHovered]    = ImVec4(0.88, 0.74, 1.00, 0.59);
+    colors[clr.CloseButtonActive]     = ImVec4(0.88, 0.85, 0.92, 1.00);
+    colors[clr.PlotLines]             = ImVec4(0.89, 0.85, 0.92, 0.63);
+    colors[clr.PlotLinesHovered]      = ImVec4(0.41, 0.19, 0.63, 1.00);
+    colors[clr.PlotHistogram]         = ImVec4(0.89, 0.85, 0.92, 0.63);
+    colors[clr.PlotHistogramHovered]  = ImVec4(0.41, 0.19, 0.63, 1.00);
+    colors[clr.TextSelectedBg]        = ImVec4(0.41, 0.19, 0.63, 0.43);
+    colors[clr.ModalWindowDarkening]  = ImVec4(0.20, 0.20, 0.20, 0.35);
 end
 
 function mdoc1(arg)
@@ -101,11 +166,6 @@ function mdoc4()
     end)
 end
 
-sampRegisterChatCommand('mdoc1', mdoc1)
-sampRegisterChatCommand('mdoc2', mdoc2)
-sampRegisterChatCommand('mdoc3', mdoc3)
-sampRegisterChatCommand('mdoc4', mdoc4)
-
 function mcardoc1()
     lua_thread.create(function ()
         sampSendChat(u8:decode('Пожалуйста предъявите документы на ваше т/с.'))
@@ -133,9 +193,6 @@ function mcardoc2()
         sampSendChat(u8:decode('/me возвращает документы на т/с человеку напротив'))
     end)
 end
-
-sampRegisterChatCommand('mcardoc1', mcardoc1)
-sampRegisterChatCommand('mcardoc2', mcardoc2)
 
 function mcuff(arg)
     lua_thread.create(function ()
@@ -180,9 +237,6 @@ function muncuff(arg)
         sampSendChat(u8:decode('/r [ ' .. plrLetter.v .. ' | ' .. plrUnit.v .. ' ] С задержанного сняты наручники.'))
     end)
 end
-
-sampRegisterChatCommand('mcuff', mcuff)
-sampRegisterChatCommand('muncuff', muncuff)
 
 function mpgcmd(arg)
     lua_thread.create(function ()
@@ -272,12 +326,6 @@ function mticket()
     end)
 end
 
-sampRegisterChatCommand('mpg', mpgcmd)
-sampRegisterChatCommand('mputpl', mputpl)
-sampRegisterChatCommand('msu', msu)
-sampRegisterChatCommand('mcarsu', mcarsu)
-sampRegisterChatCommand('mticket', mticket)
-
 function mg1()
     lua_thread.create(function ()
         sampSendChat(u8:decode('/me взял с плеча Громкоговоритель в руки и зажал кнопку разговора'))
@@ -301,10 +349,6 @@ function mg3()
         sampSendChat(u8:decode('/m [МВД] Делаю принудительный выстрел. Это последнее предупреждение{!}'))
     end)
 end
-
-sampRegisterChatCommand('mg1', mg1)
-sampRegisterChatCommand('mg2', mg2)
-sampRegisterChatCommand('mg3', mg3)
 
 function meject(arg)
     lua_thread.create(function ()
@@ -356,10 +400,6 @@ function marrest1()
     end)
 end
 
-sampRegisterChatCommand('meject', meject)
-sampRegisterChatCommand('marrest', marrest)
-sampRegisterChatCommand('marrest1', marrest1)
-
 function mtakelic(arg)
     lua_thread.create(function ()
         sampSendChat(u8:decode('/me взял КПК из поясной сумки и включил его, выбрал приложение "База Данных МВД"'))
@@ -375,8 +415,6 @@ function mtakelic(arg)
         sampSendChat(u8:decode('/takelic ' .. arg .. ''))
     end)
 end
-
-sampRegisterChatCommand('mtakelic', mtakelic)
 
 function speech_doc()
     lua_thread.create(function()
@@ -440,72 +478,31 @@ function speech_finger()
     end)
 end
 
-function apply_custom_style()
-    imgui.SwitchContext()
-    local style = imgui.GetStyle()
-    local colors = style.Colors
-    local clr = imgui.Col
-    local ImVec4 = imgui.ImVec4
-    style.WindowRounding = 2
-    style.WindowTitleAlign = imgui.ImVec2(0.5, 0.5)
-    style.ChildWindowRounding = 2.0
-    style.FrameRounding = 3
-    style.ItemSpacing = imgui.ImVec2(5.0, 4.0)
-    style.ScrollbarSize = 13.0
-    style.ScrollbarRounding = 0
-    style.GrabMinSize = 8.0
-    style.GrabRounding = 1.0
-    style.WindowPadding = imgui.ImVec2(4.0, 4.0)
-    style.FramePadding = imgui.ImVec2(3.5, 3.5)
-    style.ButtonTextAlign = imgui.ImVec2(0.0, 0.5)
-    colors[clr.WindowBg]              = ImVec4(0.14, 0.12, 0.16, 1.00);
-    colors[clr.ChildWindowBg]         = ImVec4(0.30, 0.20, 0.39, 0.00);
-    colors[clr.PopupBg]               = ImVec4(0.05, 0.05, 0.10, 0.90);
-    colors[clr.Border]                = ImVec4(0.89, 0.85, 0.92, 0.30);
-    colors[clr.BorderShadow]          = ImVec4(0.00, 0.00, 0.00, 0.00);
-    colors[clr.FrameBg]               = ImVec4(0.30, 0.20, 0.39, 1.00);
-    colors[clr.FrameBgHovered]        = ImVec4(0.41, 0.19, 0.63, 0.68);
-    colors[clr.FrameBgActive]         = ImVec4(0.41, 0.19, 0.63, 1.00);
-    colors[clr.TitleBg]               = ImVec4(0.41, 0.19, 0.63, 0.45);
-    colors[clr.TitleBgCollapsed]      = ImVec4(0.41, 0.19, 0.63, 0.35);
-    colors[clr.TitleBgActive]         = ImVec4(0.41, 0.19, 0.63, 0.78);
-    colors[clr.MenuBarBg]             = ImVec4(0.30, 0.20, 0.39, 0.57);
-    colors[clr.ScrollbarBg]           = ImVec4(0.30, 0.20, 0.39, 1.00);
-    colors[clr.ScrollbarGrab]         = ImVec4(0.41, 0.19, 0.63, 0.31);
-    colors[clr.ScrollbarGrabHovered]  = ImVec4(0.41, 0.19, 0.63, 0.78);
-    colors[clr.ScrollbarGrabActive]   = ImVec4(0.41, 0.19, 0.63, 1.00);
-    colors[clr.ComboBg]               = ImVec4(0.30, 0.20, 0.39, 1.00);
-    colors[clr.CheckMark]             = ImVec4(0.56, 0.61, 1.00, 1.00);
-    colors[clr.SliderGrab]            = ImVec4(0.41, 0.19, 0.63, 0.24);
-    colors[clr.SliderGrabActive]      = ImVec4(0.41, 0.19, 0.63, 1.00);
-    colors[clr.Button]                = ImVec4(0.41, 0.19, 0.63, 0.44);
-    colors[clr.ButtonHovered]         = ImVec4(0.41, 0.19, 0.63, 0.86);
-    colors[clr.ButtonActive]          = ImVec4(0.64, 0.33, 0.94, 1.00);
-    colors[clr.Header]                = ImVec4(0.41, 0.19, 0.63, 0.76);
-    colors[clr.HeaderHovered]         = ImVec4(0.41, 0.19, 0.63, 0.86);
-    colors[clr.HeaderActive]          = ImVec4(0.41, 0.19, 0.63, 1.00);
-    colors[clr.ResizeGrip]            = ImVec4(0.41, 0.19, 0.63, 0.20);
-    colors[clr.ResizeGripHovered]     = ImVec4(0.41, 0.19, 0.63, 0.78);
-    colors[clr.ResizeGripActive]      = ImVec4(0.41, 0.19, 0.63, 1.00);
-    colors[clr.CloseButton]           = ImVec4(1.00, 1.00, 1.00, 0.75);
-    colors[clr.CloseButtonHovered]    = ImVec4(0.88, 0.74, 1.00, 0.59);
-    colors[clr.CloseButtonActive]     = ImVec4(0.88, 0.85, 0.92, 1.00);
-    colors[clr.PlotLines]             = ImVec4(0.89, 0.85, 0.92, 0.63);
-    colors[clr.PlotLinesHovered]      = ImVec4(0.41, 0.19, 0.63, 1.00);
-    colors[clr.PlotHistogram]         = ImVec4(0.89, 0.85, 0.92, 0.63);
-    colors[clr.PlotHistogramHovered]  = ImVec4(0.41, 0.19, 0.63, 1.00);
-    colors[clr.TextSelectedBg]        = ImVec4(0.41, 0.19, 0.63, 0.43);
-    colors[clr.ModalWindowDarkening]  = ImVec4(0.20, 0.20, 0.20, 0.35);
+function quickCuff()
+    lua_thread.create(function()
+        local closest_id = findNearestPlayer()
+        if closest_id then
+            sampSendChat(u8:decode('/cuff '.. closest_id))
+            sampSendChat(u8:decode('/escort '.. closest_id))
+            sampSendChat(u8:decode('/todo Сев на человека сверху*Руки за спину.'))
+            wait(600)
+            sampSendChat(u8:decode('/me правой рукой снял наручники с пояса, левой придерживает руки человека'))
+            wait(600)
+            sampSendChat(u8:decode('/do Идёт процесс надевания наручников.'))
+            wait(600)
+            sampSendChat(u8:decode('/me туго застегнул манжеты на руках человека'))
+            wait(900)
+            sampSendChat(u8:decode('/todo Поднимая человека с земли*Ноги под себя!'))
+            wait(600)
+            sampSendChat(u8:decode('/todo Говоря в рацию*Провожу задержание.'))
+            wait(900)
+            sampSendChat(u8:decode('/r [ ' .. plrLetter.v .. ' | ' .. plrUnit.v .. ' ] Произвожу задержание.'))
+        else
+            sampAddChatMessage(u8:decode'[MVDHelper] Нет ближайшего игрока.', 0)
+        end
+    end)
 end
-apply_custom_style()
 
-local menu = {true,
-    false,
-    false,
-    false,
-    false}
-
-local main_window_state = imgui.ImBool(false)
 function imgui.OnDrawFrame()
   if main_window_state.v then
     imgui.SetNextWindowSize(imgui.ImVec2(550, 300), imgui.Cond.FirstUseEver)
@@ -604,7 +601,7 @@ function imgui.OnDrawFrame()
         imgui.Text('Результат:')
         imgui.Text(' [' .. plrLetter.v .. '] Докладывает ' .. fam.v .. ', ' .. wtd .. ' '  .. test_text_buffer3.v .. '. Состояние ' .. sost .. '.')
         if imgui.Button('Отправить') then
-            sampSendChat(u8:decode('/n [' .. plrLetter.v .. '] Докладывает ' .. fam.v .. ', ' .. wtd .. ' '  .. test_text_buffer3.v .. '. Состояние ' .. sost .. '.'))
+            sampSendChat(u8:decode('/r [' .. plrLetter.v .. '] Докладывает ' .. fam.v .. ', ' .. wtd .. ' '  .. test_text_buffer3.v .. '. Состояние ' .. sost .. '.'))
         end
     end
     if menu[3] then
@@ -654,6 +651,9 @@ function imgui.OnDrawFrame()
         if imgui.Button('Сканер отпечатков') then
             speech_finger()
         end
+        if imgui.Button('Тест') then
+            quickCuff()
+        end
     end
     imgui.End()
   end
@@ -665,24 +665,42 @@ function uu()
     end
 end
 
+sampRegisterChatCommand('mtakelic', mtakelic)
+sampRegisterChatCommand('meject', meject)
+sampRegisterChatCommand('marrest', marrest)
+sampRegisterChatCommand('marrest1', marrest1)
+sampRegisterChatCommand('mg1', mg1)
+sampRegisterChatCommand('mg2', mg2)
+sampRegisterChatCommand('mg3', mg3)
+sampRegisterChatCommand('mdoc1', mdoc1)
+sampRegisterChatCommand('mdoc2', mdoc2)
+sampRegisterChatCommand('mdoc3', mdoc3)
+sampRegisterChatCommand('mdoc4', mdoc4)
+sampRegisterChatCommand('mcardoc1', mcardoc1)
+sampRegisterChatCommand('mcardoc2', mcardoc2)
+sampRegisterChatCommand('mcuff', mcuff)
+sampRegisterChatCommand('muncuff', muncuff)
+sampRegisterChatCommand('mpg', mpgcmd)
+sampRegisterChatCommand('mputpl', mputpl)
+sampRegisterChatCommand('msu', msu)
+sampRegisterChatCommand('mcarsu', mcarsu)
+sampRegisterChatCommand('mticket', mticket)
+apply_custom_style()
+
 function main()
     if not doesFileExist('moonloader/config/mvd_helper_settings.ini') then
         inicfg.save(default_settings, 'mvd_helper_settings')
     end
     load_settings()
+
     while true do
-      wait(0)
-      if wasKeyPressed(key.VK_DELETE) and not sampIsChatInputActive() and not sampIsDialogActive() then
-        main_window_state.v = not main_window_state.v
-        -- Block/unblock game input when menu is opened/closed
-        if main_window_state.v then
-            lockPlayerControl(true)
-            showCursor(true, true)
+        wait(0)
+        if wasKeyPressed(key.VK_DELETE) and not sampIsChatInputActive() and not sampIsDialogActive() then
+            main_window_state.v = not main_window_state.v
+        end
+        if main_window_state.v and wasKeyPressed(key.VK_T) then
         else
-            lockPlayerControl(false)
-            showCursor(false, false)
+            imgui.Process = main_window_state.v
         end
     end
-      imgui.Process = main_window_state.v
-    end
-  end
+end
