@@ -672,7 +672,7 @@ function main()
     load_settings()
     while true do
       wait(0)
-      if wasKeyPressed(key.VK_B) and not sampIsChatInputActive() and not sampIsDialogActive() then
+      if wasKeyPressed(key.VK_DELETE) and not sampIsChatInputActive() and not sampIsDialogActive() then
         main_window_state.v = not main_window_state.v
         -- Block/unblock game input when menu is opened/closed
         if main_window_state.v then
