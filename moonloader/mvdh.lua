@@ -14,7 +14,7 @@ local test_text_buffer3 = imgui.ImBuffer(256)
 local combo_select = imgui.ImInt(0)
 local combo_select2 = imgui.ImInt(0)
 local settings = inicfg.load(default_settings, 'mvd_helper_settings')
-local menu = {true, false, false, false, false}
+local menu = {true, false, false, false, false, false}
 local main_window_state = imgui.ImBool(false)
 encoding.default = 'CP1251'
 u8 = encoding.UTF8
@@ -36,24 +36,6 @@ function load_settings()
         plrLetter.v = settings.main.plrLetter or ''
         fam.v = settings.main.fam or ''
     end
-end
-
-function findNearestPlayer()
-    local x, y, z = getCharCoordinates(PLAYER_PED)
-    local buffer, nearestPlayer, nearestPlayer_id
-    
-    for _, v in ipairs(getAllChars()) do
-        local result, id = sampGetPlayerIdByCharHandle(v)
-        if result and v ~= PLAYER_PED then
-            local distance = getDistanceBetweenCoords3d(x, y, z, getCharCoordinates(v))
-            if distance <= 2.0 and (buffer == nil or distance < buffer) and not isCharInAnyCar(v) then
-                buffer = distance
-                nearestPlayer_id = id
-            end
-        end
-    end
-    
-    return nearestPlayer_id
 end
 
 function apply_custom_style()
@@ -478,29 +460,191 @@ function speech_finger()
     end)
 end
 
-function quickCuff()
+function pushups()
     lua_thread.create(function()
-        local closest_id = findNearestPlayer()
-        if closest_id then
-            sampSendChat(u8:decode('/cuff '.. closest_id))
-            sampSendChat(u8:decode('/escort '.. closest_id))
-            sampSendChat(u8:decode('/todo Сев на человека сверху*Руки за спину.'))
-            wait(600)
-            sampSendChat(u8:decode('/me правой рукой снял наручники с пояса, левой придерживает руки человека'))
-            wait(600)
-            sampSendChat(u8:decode('/do Идёт процесс надевания наручников.'))
-            wait(600)
-            sampSendChat(u8:decode('/me туго застегнул манжеты на руках человека'))
-            wait(900)
-            sampSendChat(u8:decode('/todo Поднимая человека с земли*Ноги под себя!'))
-            wait(600)
-            sampSendChat(u8:decode('/todo Говоря в рацию*Провожу задержание.'))
-            wait(900)
-            sampSendChat(u8:decode('/r [ ' .. plrLetter.v .. ' | ' .. plrUnit.v .. ' ] Произвожу задержание.'))
-        else
-            sampAddChatMessage(u8:decode'[MVDHelper] Нет ближайшего игрока.', 0)
+            sampSendChat(u8:decode('/me начал отжиматся'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true)
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false) 
+            wait(1000)
+            sampSendChat(u8:decode('/do Процесс..'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true) 
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false)
+            wait(1000)
+            sampSendChat(u8:decode('/me закончил упражнение'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true)
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false)
         end
-    end)
+    )
+end
+
+function squatting()
+    lua_thread.create(function()
+            sampSendChat(u8:decode('/me начал приседать'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true)
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false) 
+            wait(1000)
+            sampSendChat(u8:decode('/do Процесс..'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true) 
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false)
+            wait(1000)
+            sampSendChat(u8:decode('/me закончил упражнение'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true)
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false)
+        end
+    )
+end
+
+function barbell()
+    lua_thread.create(function()
+            sampSendChat(u8:decode('/me лег на скамейку и поднял штангу'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true)
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false) 
+            wait(1000)
+            sampSendChat(u8:decode('/do Процесс..'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true) 
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false)
+            wait(1000)
+            sampSendChat(u8:decode('/me закончил упражнение'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true)
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false)
+        end
+    )
+end
+
+function takefromtrunk()
+    lua_thread.create(function()
+            sampSendChat(u8:decode('/me нагнулся в багажник и схватился за оборудование'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true)
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false) 
+            wait(1000)
+            sampSendChat(u8:decode('/do Процесс..'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true) 
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false)
+            wait(1000)
+            sampSendChat(u8:decode('/me достал оборудование из багажника поставив его на землю'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true)
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false)
+        end
+    )
+end
+
+function searchforevidence()
+    lua_thread.create(function()
+            sampSendChat(u8:decode('/me присел и начал водить руками в перчатках по земле'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true)
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false) 
+            wait(1000)
+            sampSendChat(u8:decode('/do Процесс..'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true) 
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false)
+            wait(1000)
+            sampSendChat(u8:decode('/me нащупал осколок стекла и засунул его в оборудование'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true)
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false)
+        end
+    )
+end
+
+function putintrunk()
+    lua_thread.create(function()
+            sampSendChat(u8:decode('/me нагнулся в багажник и сложил оборудование с уликами'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true)
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false) 
+            wait(1000)
+            sampSendChat(u8:decode('/do Процесс..'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true) 
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false)
+            wait(1000)
+            sampSendChat(u8:decode('/do Оборудование в багажнике'))
+            wait(500)
+            sampSendChat(u8:decode('/c 60'))
+            wait(300)
+            setVirtualKeyDown(key.VK_F8, true)
+            wait(10)
+            setVirtualKeyDown(key.VK_F8, false)
+        end
+    )
+end
+
+function ad()
+    lua_thread.create(function()
+            sampSendChat(u8:decode('/fm --------------------------------------------------------'))
+            wait(500)
+            sampSendChat(u8:decode('/fm https://discord.gg/zJtE5N9Ag7'))
+            wait(500)
+            sampSendChat(u8:decode('/fm --------------------------------------------------------'))
+            wait(500)
+            sampSendChat(u8:decode('/fm Ссылка на Discord МВД 12'))
+        end
+    )
 end
 
 function imgui.OnDrawFrame()
@@ -528,6 +672,9 @@ function imgui.OnDrawFrame()
         uu() menu[5] = true
     end
     imgui.SameLine()
+    if imgui.Button('Строй') then
+        uu() menu[6] = true
+    end
     imgui.EndGroup()
     imgui.Separator()
     if menu[1] then
@@ -651,8 +798,42 @@ function imgui.OnDrawFrame()
         if imgui.Button('Сканер отпечатков') then
             speech_finger()
         end
-        if imgui.Button('Тест') then
-            quickCuff()
+    end
+    if menu[6] then
+        if imgui.Button('Отжимания') then
+            main_window_state.v = not main_window_state.v
+            pushups()
+            main_window_state.v = not main_window_state.v
+        end
+        imgui.SameLine()
+        if imgui.Button('Приседания') then
+            main_window_state.v = not main_window_state.v
+            squatting()
+            main_window_state.v = not main_window_state.v
+        end
+        imgui.SameLine()
+        if imgui.Button('Штанга') then
+            main_window_state.v = not main_window_state.v
+            barbell()
+            main_window_state.v = not main_window_state.v
+        end
+        imgui.SameLine()
+        if imgui.Button('Взять оборудование') then
+            main_window_state.v = not main_window_state.v
+            takefromtrunk()
+            main_window_state.v = not main_window_state.v
+        end
+        imgui.SameLine()
+        if imgui.Button('Искать улики') then
+            main_window_state.v = not main_window_state.v
+            searchforevidence()
+            main_window_state.v = not main_window_state.v
+        end
+        imgui.SameLine()
+        if imgui.Button('Сложить оборудование') then
+            main_window_state.v = not main_window_state.v
+            searchforevidence()
+            main_window_state.v = not main_window_state.v
         end
     end
     imgui.End()
@@ -660,7 +841,7 @@ function imgui.OnDrawFrame()
 end
 
 function uu()
-    for i = 0,5 do
+    for i = 0,6 do
         menu[i] = false
     end
 end
