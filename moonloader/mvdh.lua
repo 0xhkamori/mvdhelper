@@ -13,11 +13,33 @@ local sost = 'Стабильное / Критичное'
 local test_text_buffer3 = imgui.ImBuffer(256)
 local combo_select = imgui.ImInt(0)
 local combo_select2 = imgui.ImInt(0)
-local settings = inicfg.load(default_settings, 'mvd_helper_settings')
 local menu = {true, false, false, false, false, false}
 local main_window_state = imgui.ImBool(false)
 encoding.default = 'CP1251'
 u8 = encoding.UTF8
+local default_settings = {
+    main = {
+        plrName = '',
+        plrRank = '',
+        plrUnit = '',
+        plrLetter = '',
+        fam = ''
+    }
+}
+
+if not doesDirectoryExist('moonloader/config') then
+    createDirectory('moonloader/config')
+end
+
+if not doesFileExist('moonloader/config/mvd_helper_settings.ini') then
+    local new_settings = inicfg.save(default_settings, 'mvd_helper_settings')
+end
+
+local settings = inicfg.load(default_settings, 'mvd_helper_settings')
+if not settings then
+    settings = default_settings
+    inicfg.save(settings, 'mvd_helper_settings')
+end
 
 function save_settings()
     settings.main.plrName = plrName.v
